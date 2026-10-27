@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#2f46e0">
+<meta name="color-scheme" content="light dark">
+<title>HR Attendance</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/favicon.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="app.css">
+<script src="app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<noscript><p class="noscript">This app needs JavaScript. Please turn it on in your browser.</p></noscript>
+
+<div id="login-screen" class="login-wrap" hidden>
+  <form id="login-form" class="login-card" autocomplete="on" novalidate>
+    <div class="logo logo-dark"><img src="icons/logo.png" alt="Client" class="logo-img"><span>HR Attendance</span></div>
+    <h1>Sign in</h1>
+    <p class="sub">Use the username and password given to you by Admin.</p>
+    <label for="login-user">Username</label>
+    <input id="login-user" name="username" type="text" autocomplete="username" required>
+    <label for="login-pass">Password</label>
+    <input id="login-pass" name="password" type="password" autocomplete="current-password" required>
+    <p id="lan-warning" class="sub" hidden>This connection is not encrypted. Do not use a password you use anywhere else.</p>
+    <p id="login-error" class="form-error" role="alert" hidden></p>
+    <button id="login-submit" class="btn" type="submit">Sign in</button>
+    <details class="forgot">
+      <summary>Forgot password?</summary>
+      <ol>
+        <li>Do not guess. Five wrong tries lock the sign-in for 5 minutes.</li>
+        <li>Ask your HRM or the CEO (the Master Admin for them). They reset your password in Settings and give you a temporary one in person.</li>
+        <li>Sign in with the temporary password. The app then asks you to choose your own.</li>
+        <li>Nobody can see your password, not even Admin. Never send it by chat or email.</li>
+        <li>For the Master Admin account only: the developer resets it on the app PC with <code>scripts\set_user_password.py</code>.</li>
+      </ol>
+    </details>
+  </form>
+</div>
+
+<div id="app" class="app" hidden>
+  <aside class="side">
+    <div class="logo"><img src="icons/logo.png" alt="Client" class="logo-img"><span>HR Attendance</span></div>
+    <nav id="nav" class="nav" aria-label="Main"></nav>
+  </aside>
+  <main id="main" class="main" tabindex="-1">
+    <div id="demo-banner" class="demo-banner" role="note" hidden>Demo mode: sample data only. Nothing here is real and nothing is saved.</div>
+    <div id="view"></div>
+  </main>
+</div>
+
+<div id="drawer-backdrop" class="backdrop" hidden></div>
+<aside id="drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title" tabindex="-1" hidden>
+  <div class="drawer-head">
+    <h2 id="drawer-title">Review</h2>
+    <button id="drawer-close" class="btn ghost" type="button" aria-label="Close review panel">Close</button>
+  </div>
+  <div id="drawer-body" class="drawer-body"></div>
+</aside>
+
+<div id="modal-backdrop" class="backdrop" hidden></div>
+<div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1" hidden>
+  <div class="modal-head">
+    <h2 id="modal-title"></h2>
+    <button id="modal-close" class="btn ghost" type="button" aria-label="Close">✕</button>
+  </div>
+  <div id="modal-body" class="modal-body"></div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

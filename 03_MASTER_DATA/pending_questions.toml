@@ -1,0 +1,91 @@
+# pending_questions.toml: plain-language questions and options shown to Client
+# on the daily Review page's "Pending answers from Client" section.
+#
+# Each [[questions]] table is one ref. `options` holds two plain-language
+# choices; each option's `effect` is NOT shown on the page -- it only tells us
+# which rules.toml key(s) to set and to what value if Client picks that
+# option. Every rule key named in an effect must already exist in rules.toml.
+#
+# This file does not change any rule by itself. An answer still has to be
+# applied to rules.toml by hand (or by a future tool), per the instructions
+# at the top of rules.toml.
+
+[[questions]]
+ref = "Q1"
+topic = "Late rule"
+question = "How should being late be counted?"
+
+[[questions.options]]
+label = "15-minute grace, then round up to the next 30 minutes"
+[questions.options.effect]
+late_deduction_mode = "round_up"
+late_round_up_to_minutes = 30
+
+[[questions.options]]
+label = "Any minute late counts, rounded up to 30 minutes"
+[questions.options.effect]
+late_deduction_mode = "actual_minutes"
+late_round_up_to_minutes = 30
+
+[[questions]]
+ref = "Q1b"
+topic = "Every shift"
+question = "Does the late rule apply to every shift start, not only the 10:00 opening?"
+
+[[questions.options]]
+label = "Yes, every shift"
+[questions.options.effect]
+grace_applies_to_all_shifts = true
+early_clock_in_counts_as_start_all_shifts = true
+
+[[questions.options]]
+label = "No, only the 10:00 opening"
+[questions.options.effect]
+grace_applies_to_all_shifts = false
+early_clock_in_counts_as_start_all_shifts = false
+
+[[questions]]
+ref = "Q3"
+topic = "Overtime rate"
+question = "Which overtime rate do we show?"
+
+[[questions.options]]
+label = "The rate typed in the HR workbook"
+[questions.options.effect]
+ot_reference_only = true
+
+[[questions.options]]
+label = "Standard rates: normal 1.5, rest day 2.0, public holiday 3.0"
+[questions.options.effect]
+ot_reference_only = false
+ot_rate_day_types = "normal 1.5, rest day 2.0, public holiday 3.0"
+
+[[questions]]
+ref = "Q11"
+topic = "Leave day length"
+question = "How many hours does a leave day count for?"
+
+[[questions.options]]
+label = "8 hours 30 minutes"
+[questions.options.effect]
+leave_day_hours = 8.5
+
+[[questions.options]]
+label = "8 hours"
+[questions.options.effect]
+leave_day_hours = 8.0
+
+[[questions]]
+ref = "Q12"
+topic = "One clock record"
+question = "A day has only one clock record. What should we do?"
+
+[[questions.options]]
+label = "Decide by the time of day (before midday = clock-in)"
+[questions.options.effect]
+single_punch_classification = "closer_to_boundary"
+
+[[questions.options]]
+label = "Always flag it for HR to check"
+[questions.options.effect]
+single_punch_classification = "always_flag"

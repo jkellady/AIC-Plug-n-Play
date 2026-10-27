@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>HR Attendance App - Staff Guide</title>
+<style>
+:root{--bg:#F5F5F5;--paper:#fff;--ink:#14161C;--soft:#565C6B;--line:#E2E4E9;--acc:#D8722C;--ok:#0F7A4F;--okb:#E3F3EA;--wr:#8A5A00;--wrb:#FFF0CF;--rd:#9B2C1F;--rdb:#FBE4E0;--no:#565C6B;--nob:#ECEEF2}
+*{box-sizing:border-box}html{background:#F5F5F5;color-scheme:light}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Inter,-apple-system,"Segoe UI",Arial,sans-serif}
+.w{max-width:860px;margin:24px auto;padding:0 16px}
+.c{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:22px 28px;margin-bottom:18px}
+h1{font-size:1.7rem;margin:0 0 4px}h2{font-size:1.25rem;margin:0 0 10px}
+p{margin:0 0 10px}.s{color:var(--soft)}
+ol.st{list-style:none;margin:0;padding:0;counter-reset:n}
+ol.st>li{counter-increment:n;display:grid;grid-template-columns:38px 1fr;gap:14px;padding:12px 0;border-bottom:1px solid var(--line)}
+ol.st>li:last-child{border-bottom:0}
+ol.st>li:before{content:counter(n);width:34px;height:34px;border-radius:50%;background:var(--acc);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+ol.st b{display:block}
+code{background:#F0F1F5;padding:1px 6px;border-radius:3px;font-size:.9em;word-break:break-word}
+table{width:100%;border-collapse:collapse;font-size:.95rem}th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.78rem;color:var(--soft)}.t{overflow-x:auto}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.chip{display:inline-block;padding:1px 10px;border-radius:10px;font-size:.8rem;font-weight:600;white-space:nowrap}
+.ok{background:var(--okb);color:var(--ok)}.wr{background:var(--wrb);color:var(--wr)}.rd{background:var(--rdb);color:var(--rd)}.no{background:var(--nob);color:var(--no)}
+.note{border-left:3px solid var(--acc);background:#FFF9F3;padding:10px 14px;margin:10px 0}
+.stop{border-left:3px solid var(--rd);background:#FDF3F1;padding:10px 14px;margin:10px 0}
+ul{margin:6px 0 10px 20px;padding:0}li{margin:4px 0}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:12px}.g>div{border:1px solid var(--line);border-radius:6px;padding:12px 14px;background:#FAFAFB}
+@media(max-width:700px){.g{grid-template-columns:1fr}.c{padding:18px 16px}}
+@media print{body{background:#fff}.c{break-inside:avoid;border:0;padding:8px 0}}
+</style></head><body><div class="w">
+
+<div class="c">
+<h1>HR Attendance App: Staff Guide</h1>
+<p class="s">For Viewer, HR (HRM), Admin and the CEO. Prepared by JK Zentra. The app is a window on this computer that shows the attendance check results. It only <b>reads and reports</b>. HR decides every item.</p>
+<div class="note"><b>Before first use:</b> JK Zentra sets up the app and your login on this computer.</div>
+</div>
+
+<div class="c">
+<h2>Who sees what</h2>
+<div class="t"><table>
+<tr><th>Role</th><th>Can see</th><th>Can do</th></tr>
+<tr><td><b>Viewer</b></td><td>Overview, Reports (Review page), Rules</td><td>Read. The Excel flag workbook is for HRM and above</td></tr>
+<tr><td><b>HRM</b></td><td>Viewer's pages, plus Exceptions and the Excel workbook</td><td>Read exceptions; add Viewer and Admin users (Settings)</td></tr>
+<tr><td><b>Admin</b></td><td>HRM's pages, plus Staff, Outlets, Attendance scan, Log files, System health</td><td>Upload files, run a scan, create reports, add and edit staff and outlet records, IT help</td></tr>
+<tr><td><b>CEO</b></td><td>Overview, Reports, Exceptions, Staff and Outlets (view), Rules</td><td>Edit rules; add Admin, HRM and Viewer users</td></tr>
+<tr><td><b>Master Admin</b> (JK Zentra)</td><td>Everything</td><td>Everything, including office network access. Nobody else can change this account</td></tr>
+</table></div>
+<p class="s">Your password is only changed under <b>Settings</b>. Passwords can never be shown by anyone, not even Admin; a reset sets a new temporary password that you must change at your next sign-in. The <b>Help</b> button in the menu opens a pop-up: ask the help bot about a rule or flag, or (Admin) run the IT check.</p>
+<p class="s">Staff are shown by staff ID where possible. Do not copy names or screens outside Client.</p>
+</div>
+
+<div class="c">
+<h2>Forgot your password?</h2>
+<ol class="st">
+<li><div><b>Do not guess</b>Five wrong tries lock your sign-in for 5 minutes.</div></li>
+<li><div><b>Ask your HRM or the CEO</b>They open Settings, find your name under Users and set a temporary password for you. They tell you in person, not by chat or email.</div></li>
+<li><div><b>Sign in with the temporary password</b>The app asks you to choose your own straight away.</div></li>
+<li><div><b>If you are locked out</b>Wait 5 minutes, or ask the HRM or CEO to press <b>Unlock</b>.</div></li>
+</ol>
+<p class="s">Nobody can see your password, not even Admin or the Master Admin. The Master Admin account is reset only by JK Zentra on this computer.</p>
+</div>
+
+<div class="c">
+<h2>Open it</h2>
+<ol class="st">
+<li><div><b>Double-click the desktop icon "HR Attendance"</b>It starts the app quietly in the background and opens its own window. This can take up to about 20 seconds the first time.</div></li>
+<li><div><b>Sign in</b>Use the username and password JK Zentra gave you. Never share it. After 5 wrong tries you must wait 5 minutes. You are signed out after 30 minutes of no use.</div></li>
+<li><div><b>Pick a page from the menu</b>Start with Overview. Exceptions lists what HR needs to look at.</div></li>
+<li><div><b>When finished, sign out</b> and close the window.</div></li>
+</ol>
+<div class="stop"><b>No icon yet?</b> It has not been created on this computer yet. Ask JK Zentra. Do not look for the server yourself.</div>
+</div>
+
+<div class="c">
+<h2>Open it from your own desk PC (office network)</h2>
+<p>Only after JK Zentra has switched this on. It works only on the office Wi-Fi or network.</p>
+<ol class="st">
+<li><div><b>Ask JK Zentra for the address</b>It looks like <code>http://192.168.x.x:8765/</code>.</div></li>
+<li><div><b>Open Microsoft Edge on your PC and type the address</b>The attendance PC must be switched on with the app running.</div></li>
+<li><div><b>Sign in with your own account</b>Never use someone else's.</div></li>
+</ol>
+<div class="note">The connection is not encrypted, so use it only in the office. You may <b>view</b> in the app; do not copy staff files or reports to personal devices, email or chat.</div>
+</div>
+
+<div class="c">
+<h2>Optional: install it from Edge</h2>
+<p>If the app is already running, you can also open Microsoft Edge, go to <code>http://127.0.0.1:8765/</code>, open the menu (three dots), choose <b>Apps</b>, then <b>Install this site as an app</b>. Edge then makes its own icon. This icon does not start the app by itself. If it says it cannot connect, use the desktop icon first.</p>
+</div>
+
+<div class="c">
+<h2>Each month (Admin)</h2>
+<ol class="st">
+<li><div><b>Open the app and go to Attendance scan</b></div></li>
+<li><div><b>Upload the month's files</b>Clock exports, schedule and HR workbook. Only <code>.xls</code>, <code>.xlsx</code> and <code>.csv</code> are accepted. Do not rename or edit them first.</div></li>
+<li><div><b>Run the scan</b> and wait for the result.</div></li>
+<li><div><b>Go to Reports</b> to open or download the Excel report. HRM then goes through Exceptions.</div></li>
+</ol>
+<p class="s">If a button says "not available yet", that part is not finished. Tell JK Zentra.</p>
+</div>
+
+<div class="c">
+<h2>If something looks wrong</h2>
+<div class="t"><table>
+<tr><th>What you see</th><th>What to do</th></tr>
+<tr><td>"no users set up"</td><td>Your login has not been created yet. Ask JK Zentra.</td></tr>
+<tr><td>Wrong password message</td><td>Try again carefully. After 5 tries wait 5 minutes. Ask JK Zentra for a reset; never ask a colleague for theirs.</td></tr>
+<tr><td>A message box says the app did not start</td><td>Take a photo of it and tell JK Zentra. The files to send are in <code>07_LOGS\webapp</code>.</td></tr>
+<tr><td>The window is blank or cannot connect</td><td>Close it and double-click the desktop icon again.</td></tr>
+<tr><td>A page you expect is missing from the menu</td><td>Your role does not include it. That is by design.</td></tr>
+</table></div>
+<p class="s">JK Zentra stops the app, when needed, with <code>scripts\launch_app.ps1 -Stop</code>. Staff do not need to do this.</p>
+</div>
+
+<div class="c">
+<h2>Please do not</h2>
+<ul><li>Change anything in the data folders (<code>01</code> to <code>05</code>) by hand.</li><li>Email or message reports, screenshots or files outside Client.</li><li>Ask the app about pricing or payment. That is for JK Zentra.</li></ul>
+</div>
+
+<div class="c">
+<h2>Document control</h2>
+<table>
+<tr><th>Date of creation</th><td>2026-10-18</td></tr>
+<tr><th>Version</th><td>4 (2026-10-19: forgot-password steps; v3 added five roles, Settings, Help pop-up, reports viewed in the app)</td></tr>
+<tr><th>Supersedes</th><td>Version 3 of this same file (earlier 2026-10-19; no copy kept), version 2 (2026-10-18, office network access) and version 1. Technical twin: <code>docs\WEBAPP_GUIDE.md</code>.</td></tr>
+</table>
+</div>
+
+</div></body></html>

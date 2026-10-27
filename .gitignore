@@ -1,0 +1,48 @@
+# Staff attendance data is personal data. Never commit it.
+_backup/
+01_DROP_FOLDER/*
+!01_DROP_FOLDER/READ_ME_FIRST.txt
+02_RAW_ARCHIVE/
+04_REFERENCE_SOURCES/
+05_CAPTURED_DATA/
+06_REPORTS/
+07_LOGS/
+03_MASTER_DATA/staff_aliases.csv
+tests/test_masterdata_real.py
+tests/test_schedule_real.py
+tests/test_dayengine_real.py
+tests/test_hrbook_real.py
+tests/test_hrcompare_real.py
+tests/test_daily_real.py
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# Secrets
+.env
+.env.*
+*.key
+*.pem
+*.pfx
+users.json
+.claude/settings.local.json
+
+# Safety net: raw clock exports, HR workbooks, reports and databases
+# must never be committed, wherever they end up in the tree
+*.xls
+*.xlsx
+*.xlsm
+*.db
+*.sqlite
+*.sqlite3
+*.log
+
+HandsoffData031026/
+HandsoffData031026.zip
+Handsoff*/
+Handsoff*.zip
+03_MASTER_DATA/approvals.csv
+approvals.csv

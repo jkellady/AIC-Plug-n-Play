@@ -1,0 +1,28 @@
+# config.toml: every path and rule value for the attendance check.
+# Paths are relative to the project root (the folder this file sits in).
+# Never hard-code C:\ paths in the code. Move the project, edit here only.
+
+[client]
+# Shown to the client's staff. Set per deployment.
+# Note: the web app screens still say "HR Attendance"; wiring this name into them is a follow-up.
+client_name = "Your Company"
+
+[paths]
+drop        = "01_DROP_FOLDER"
+raw_archive = "02_RAW_ARCHIVE"
+master_data = "03_MASTER_DATA"
+reference   = "04_REFERENCE_SOURCES"
+captured    = "05_CAPTURED_DATA"
+reports     = "06_REPORTS"
+logs        = "07_LOGS"
+
+[files]
+# Match raw clock exports by outlet prefix, not exact name (e.g. OUT3-All_Report*.xls)
+clock_export_pattern = "*-All_Report*.xls"
+run_log              = "run_log.csv"
+
+# Rule values live only in 03_MASTER_DATA/rules.toml (see src/rules.py).
+# This keeps every rule change a data edit, never a code or config change.
+
+[mode]
+read_only = true   # Phase 1: never write into HR tabs or schedule

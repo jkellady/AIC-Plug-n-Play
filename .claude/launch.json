@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "client-webapp",
+      "runtimeExecutable": "C:\\Client\\Admin_Attendance\\.venv\\Scripts\\python.exe",
+      "runtimeArgs": ["-m", "src.webapp.server"],
+      "port": 8765
+    }
+  ]
+}

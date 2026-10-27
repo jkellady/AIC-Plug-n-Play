@@ -1,0 +1,477 @@
+# rules.toml: every attendance rule lives here. The code reads these values and never hard-codes them.
+#
+# HOW TO INSERT A CLIENT ANSWER (no code change needed):
+#   1. Find the rule by its question number (e.g. Q1) or its id.
+#   2. Change `value` to the answer.
+#   3. Set status = "CONFIRMED". Fill `source` (who said it, where) and `confirmed_on` (YYYY-MM-DD).
+#   4. Add one line under [[changes]] at the bottom (date, rule, old, new, source).
+#   5. Run:  python -m src.rules check     (must print no errors)
+#   6. Rerun the week. Flags tied to that rule turn from amber to green by themselves.
+#
+# STATUS
+#   CONFIRMED = Client gave this answer. Needs `source`.
+#   ASSUMED   = working default, waiting for Client. The report shows it amber with its question number.
+#   OPEN      = no safe default. The engine shows every option side by side and flags it. Never decides silently.
+
+[meta]
+schema_version = 1
+allowed_status = ["CONFIRMED", "ASSUMED", "OPEN"]
+
+# ---------------------------------------------------------------- confirmed by Client
+
+[rules.morning_open]
+label = "Morning opening time"
+value = "10:00"
+status = "CONFIRMED"
+question = "C6"
+source = "Confirmed by Client (sample report, ref C6)"
+confirmed_on = ""
+used_in = "day engine"
+
+[rules.early_clock_in_counts_as_open]
+label = "Clock-in at 09:45 or 09:50 is not 'early'; recorded as the opening time"
+value = true
+status = "CONFIRMED"
+question = "C6"
+source = "Confirmed by Client (sample report, ref C6)"
+confirmed_on = ""
+used_in = "day engine"
+
+[rules.late_grace_minutes]
+label = "Late-in grace period (minutes)"
+value = 15
+status = "CONFIRMED"
+question = "C5"
+source = "Confirmed by Client (sample report, ref C5)"
+confirmed_on = ""
+used_in = "day engine"
+
+[rules.late_clears_if_approved]
+label = "A late-in is cleared when explained and agreed by the office or a superior"
+value = true
+status = "CONFIRMED"
+question = "C5"
+source = "Confirmed by Client (sample report, ref C5)"
+confirmed_on = ""
+used_in = "day engine"
+note = "How the approval reaches the system is rule approval_source (Q8)."
+
+[rules.transfer_is_error]
+label = "Working at another outlet is an error"
+value = false
+status = "CONFIRMED"
+question = "C4"
+source = "Confirmed by Client (sample report, ref C4)"
+confirmed_on = ""
+used_in = "day engine, report"
+note = "Flag and highlight for visibility only."
+
+[rules.ot_sum_from_clock]
+label = "Agent checks clock times and sums overtime"
+value = true
+status = "CONFIRMED"
+question = "C7"
+source = "Confirmed by Client (sample report, ref C7)"
+confirmed_on = ""
+used_in = "not built yet"
+note = "Final overtime calculation is a later HR task."
+
+[rules.whatsapp_enabled]
+label = "WhatsApp messages to staff"
+value = false
+status = "CONFIRMED"
+question = "C8"
+source = "Confirmed by Client (sample report, ref C8): on hold, later via GHL contact list"
+confirmed_on = ""
+used_in = "not used in Phase 1"
+
+# ---------------------------------------------------------------- open: waiting for Client
+
+[rules.late_deduction_mode]
+label = "How a late-in beyond grace is counted"
+value = "show_both"
+options = ["actual_minutes", "round_up", "show_both"]
+status = "ASSUMED"
+question = "Q1"
+source = "Working assumption, Boss, 3 Oct 2026, pending Client"
+confirmed_on = ""
+used_in = "day engine, report"
+note = "Phase 1 shows actual minutes and the rounded figure side by side. Pick one when Client answers."
+
+[rules.late_minutes_counted_from]
+label = "What a late-in's minutes are counted from"
+value = "opening"
+options = ["opening", "end_of_grace"]
+status = "ASSUMED"
+question = "Q1"
+source = ""
+confirmed_on = ""
+used_in = "day engine, report"
+note = "opening = minutes since the shift start; end_of_grace = minutes since grace expired (late_grace_minutes after start)."
+
+[rules.grace_applies_to_all_shifts]
+label = "The 15-minute late grace applies to every scheduled start, not only the 10:00 opening"
+value = true
+options = [true, false]
+status = "CONFIRMED"
+question = "Q1b"
+source = "Admin questionnaire Q8, Viewer, 3 Oct 2026"
+confirmed_on = "2026-10-03"
+used_in = "day engine"
+note = "Confirmed by Client (Q1b): the 15-minute grace applies to every scheduled start."
+
+[rules.late_round_up_to_minutes]
+label = "Round-up step when late_deduction_mode is round_up (minutes)"
+value = 30
+status = "ASSUMED"
+question = "Q1"
+source = "Working assumption, Boss, 3 Oct 2026, pending Client"
+confirmed_on = ""
+used_in = "day engine, report"
+note = "HQ currently rounds up to :30."
+
+[rules.single_punch_classification]
+label = "How to label a day with only one punch"
+value = "closer_to_boundary"
+status = "ASSUMED"
+question = "Q12"
+source = ""
+confirmed_on = ""
+used_in = "day engine"
+note = "closer_to_boundary = the lone punch is nearer the scheduled start -> treated as the clock-in (flag 'Missing clock-out'); nearer the scheduled end -> treated as the clock-out (flag 'Missing clock-in'). Matches the sample report on 6 of 6 single-punch days in May 2026; not yet confirmed by Client."
+
+[rules.single_punch_tie_minutes]
+label = "How close to the shift midpoint a lone punch must be to be unclassifiable"
+value = 60
+status = "ASSUMED"
+question = "Q12"
+source = ""
+confirmed_on = ""
+used_in = "day engine"
+note = "If the lone punch is within this many minutes of the midpoint between scheduled start and end, do not guess; flag 'Single punch, cannot tell clock-in from clock-out' instead."
+
+[rules.duplicate_punch_window_minutes]
+label = "How close two clock punches must be to count as one duplicate tap"
+value = 5
+status = "ASSUMED"
+question = "Q15"
+source = ""
+confirmed_on = ""
+used_in = "day engine, HR comparison"
+note = "A clock-file punch within this many minutes of its neighbour is treated as a duplicate tap, collapsed before counting system in/out or comparing with the HR tab's pasted punches."
+
+[rules.duplicate_punch_keep]
+label = "Which punch in a duplicate-tap pair is the real one"
+value = "first"
+options = ["first", "last"]
+status = "ASSUMED"
+question = "Q15"
+source = ""
+confirmed_on = ""
+used_in = "day engine, HR comparison"
+note = "Of May's 2 real duplicate-tap days, 'first' matches 1 (STAFF_H 5/23) and 'last' matches the other (STAFF_M 5/16); neither policy matches both. Picked 'first' as the default; Client's answer may change which days clear."
+
+[rules.early_clock_in_counts_as_start_all_shifts]
+label = "An early clock-in is recorded as the scheduled start on every shift, not only the 10:00 opening"
+value = true
+status = "ASSUMED"
+question = "Q1b"
+source = ""
+confirmed_on = ""
+used_in = "HR comparison"
+note = "Confirmed rule early_clock_in_counts_as_open only covers the 10:00 opening punch. This assumes the same practice applies to every shift start (12:00, 14:00, etc.) until Client confirms."
+
+[rules.excluded_staff_ids]
+label = "Staff ids to exclude from the attendance check entirely"
+value = []
+status = "ASSUMED"
+question = "Q6"
+source = "Boss, 6 Oct 2026: STAFF_N calculated normally, flagged with a remark, status unknown"
+confirmed_on = ""
+used_in = "day engine, HR comparison, coverage, staff_total"
+note = "Empty: nobody excluded. STAFF_N is calculated normally and carries an Info remark (status unknown: shareholder or salaried). Mechanism kept for future use."
+
+[rules.approval_source]
+label = "Where office or superior approvals of late-ins come from"
+value = "schedule_revised_before_drop"
+options = ["none", "approvals_csv", "ghl", "whatsapp", "sheet_column", "schedule_revised_before_drop"]
+status = "CONFIRMED"
+question = "Q8"
+source = "Admin questionnaire Q11, Viewer, 3 Oct 2026"
+confirmed_on = "2026-10-03"
+used_in = "day engine"
+note = "With 'none' every late-in beyond grace is a Check flag with approval status 'unknown'. approvals.csv is read if present."
+
+[rules.extra_ot_approval_source]
+label = "How extra overtime is approved and where it is recorded"
+value = "none"
+options = ["none", "approvals_csv", "ghl", "whatsapp", "sheet_column"]
+status = "ASSUMED"
+question = "Q2"
+source = "Working assumption, Boss, 3 Oct 2026, pending Client"
+confirmed_on = ""
+used_in = "not built yet"
+
+[rules.half_day_leave_hours]
+label = "Hours credited for a half-day leave (e.g. 12-3PM / AL)"
+value = ""
+status = "ASSUMED"
+question = "Q5"
+source = "Working assumption, Boss, 3 Oct 2026, pending Client"
+confirmed_on = ""
+used_in = "not built yet"
+note = "Empty means: flag the day, do not compute."
+
+[rules.upl_absent_unpaid]
+label = "UPL and ABSENT days are unpaid"
+value = "unknown"
+options = ["yes", "no", "unknown"]
+status = "ASSUMED"
+question = "Q11"
+source = "Working assumption, Boss, 3 Oct 2026, pending Client"
+confirmed_on = ""
+used_in = "report"
+
+[rules.ot_rate_day_types]
+label = "Which day types earn overtime 2.0 and 3.0"
+value = ""
+status = "ASSUMED"
+question = "Q3"
+source = "Working assumption, Boss, 3 Oct 2026, pending Client"
+confirmed_on = ""
+used_in = "not used in Phase 1 (HR task, later)"
+
+[rules.write_policy]
+label = "Writing into HR record tabs"
+value = "read_only"
+options = ["read_only", "leave_blank", "fill_best_guess"]
+status = "ASSUMED"
+question = "Q4"
+source = "Master Client Profile Q31 (Viewer): no revision without Wong Kar Kei's approval; not yet confirmed on the 19-question sheet"
+confirmed_on = ""
+used_in = "not built yet"
+note = "Phase 1 is read-only by design. Any other value is Phase 2 and needs Client's decision."
+
+[rules.weekly_upload_day]
+label = "Day and time Admin drops the weekly files"
+value = "on_demand"
+status = "CONFIRMED"
+question = "Q7"
+source = "Admin questionnaire Q4, Viewer, 3 Oct 2026"
+confirmed_on = "2026-10-03"
+used_in = "not built yet"
+note = "Current practice: on demand. Final goal: the 1st of each month, with the full month's file."
+
+[rules.report_recipients]
+label = "Who receives the report, and where it is kept"
+value = "GHL dashboard daily notice with file link, plus WhatsApp notice when the report is generated; Nurul follows up"
+status = "CONFIRMED"
+question = "Q9"
+source = "Admin questionnaire Q19, Viewer, 3 Oct 2026"
+confirmed_on = "2026-10-03"
+used_in = "not built yet"
+note = "HR recipient to be named."
+
+# ---------------------------------------------------------------- assumed: working defaults
+
+[rules.ot_reference_only]
+label = "Overtime is reference only: the system never calculates final overtime, approves it or treats it as payable"
+value = true
+status = "ASSUMED"
+question = "C7"
+source = "Boss, 6 Oct 2026"
+confirmed_on = ""
+used_in = "not built yet"
+note = "Final overtime is calculated, approved and paid by HR. Clock-time sums are for reference only. Read with ot_sum_from_clock (C7)."
+
+[rules.asterisk_code_meaning]
+label = "Meaning of schedule codes with an asterisk"
+value = "PH* = public holiday; MC* = leave on medical certificate; OFF* = OFF plus an Info note"
+status = "ASSUMED"
+question = "Q13"
+source = "Boss, 6 Oct 2026"
+confirmed_on = ""
+used_in = "not built yet"
+note = "Read as described in value. Until the code reads this rule, the codes stay flagged 'meaning to confirm'."
+
+[rules.payroll_time_round_minutes]
+label = "Payroll-time column only: late-in rounded UP to the next step, early-out rounded DOWN to the previous step (minutes)"
+value = 30
+status = "ASSUMED"
+question = "Q1"
+source = "Boss, 6 Oct 2026"
+confirmed_on = ""
+used_in = "not built yet"
+note = "Applies to the payroll-time column only. The 15-minute late grace (late_grace_minutes) is not changed."
+
+[rules.early_out_grace_minutes]
+label = "Early-out grace period (minutes)"
+value = 15
+status = "ASSUMED"
+question = "Q5"
+source = ""
+confirmed_on = ""
+used_in = "not built yet"
+
+[rules.count_time_after_end]
+label = "Time worked after the scheduled end counts"
+value = false
+status = "ASSUMED"
+question = "Q2"
+source = ""
+confirmed_on = ""
+used_in = "day engine, report"
+note = "Reported as Info only while assumed."
+
+[rules.standard_day_hours]
+label = "Standard working day (hours)"
+value = 8.5
+status = "ASSUMED"
+question = "Q11"
+source = ""
+confirmed_on = ""
+used_in = "day engine, report"
+
+[rules.leave_day_hours]
+label = "Hours credited for a full leave day"
+value = 8.5
+status = "ASSUMED"
+question = "Q11"
+source = ""
+confirmed_on = ""
+used_in = "report"
+note = "Record tabs show 8:00, the legend says 8:30."
+
+# ---------------------------------------------------------------- change log (one entry per inserted answer)
+# [[changes]]
+# date = "2026-10-12"
+# rule = "late_deduction_mode"
+# old = "show_both"
+# new = "round_up"
+# source = "Client reply, <who>, <channel>"
+
+[[changes]]
+date = "2026-10-07"
+rule = "grace_applies_to_all_shifts"
+old = "status ASSUMED"
+new = "status CONFIRMED, value true"
+source = "Admin questionnaire Q8, Viewer, 3 Oct 2026"
+
+[[changes]]
+date = "2026-10-07"
+rule = "write_policy"
+old = "source empty"
+new = "source updated, status ASSUMED kept, value read_only"
+source = "Master Client Profile Q31 (Viewer): no revision without Wong Kar Kei's approval; not yet confirmed on the 19-question sheet"
+
+[[changes]]
+date = "2026-10-07"
+rule = "approval_source"
+old = "status ASSUMED, value none"
+new = "status CONFIRMED, value schedule_revised_before_drop (option added)"
+source = "Admin questionnaire Q11, Viewer, 3 Oct 2026"
+
+[[changes]]
+date = "2026-10-07"
+rule = "weekly_upload_day"
+old = "status ASSUMED, value empty"
+new = "status CONFIRMED, value on_demand"
+source = "Admin questionnaire Q4, Viewer, 3 Oct 2026"
+
+[[changes]]
+date = "2026-10-07"
+rule = "report_recipients"
+old = "status ASSUMED, value empty"
+new = "status CONFIRMED, GHL dashboard daily notice + WhatsApp notice on generation; Nurul follows up"
+source = "Admin questionnaire Q19, Viewer, 3 Oct 2026"
+
+[[changes]]
+date = "2026-10-07"
+rule = "ot_reference_only"
+old = "(new rule)"
+new = "status ASSUMED, value true"
+source = "Boss, 6 Oct 2026"
+
+[[changes]]
+date = "2026-10-07"
+rule = "asterisk_code_meaning"
+old = "(new rule)"
+new = "status ASSUMED, PH*/MC*/OFF* meanings"
+source = "Boss, 6 Oct 2026"
+
+[[changes]]
+date = "2026-10-07"
+rule = "payroll_time_round_minutes"
+old = "(new rule)"
+new = "status ASSUMED, value 30 (payroll-time column only)"
+source = "Boss, 6 Oct 2026"
+
+[[changes]]
+date = "2026-10-07"
+rule = "excluded_staff_ids"
+old = "[STAFF_N]"
+new = "[] (STAFF_N included, Info remark added)"
+source = "Boss, 6 Oct 2026: STAFF_N calculated normally, flagged with a remark, status unknown"
+
+[[changes]]
+date = "2026-10-03"
+rule = "late_deduction_mode"
+old = "status OPEN"
+new = "status ASSUMED, value unchanged (show_both)"
+source = "Working assumption, Boss, 3 Oct 2026, pending Client"
+
+[[changes]]
+date = "2026-10-03"
+rule = "late_round_up_to_minutes"
+old = "status OPEN"
+new = "status ASSUMED, value unchanged (30)"
+source = "Working assumption, Boss, 3 Oct 2026, pending Client"
+
+[[changes]]
+date = "2026-10-03"
+rule = "approval_source"
+old = "status OPEN"
+new = "status ASSUMED, value unchanged (none)"
+source = "Working assumption, Boss, 3 Oct 2026, pending Client"
+
+[[changes]]
+date = "2026-10-03"
+rule = "extra_ot_approval_source"
+old = "status OPEN"
+new = "status ASSUMED, value unchanged (none)"
+source = "Working assumption, Boss, 3 Oct 2026, pending Client"
+
+[[changes]]
+date = "2026-10-03"
+rule = "half_day_leave_hours"
+old = "status OPEN"
+new = "status ASSUMED, value unchanged (empty)"
+source = "Working assumption, Boss, 3 Oct 2026, pending Client"
+
+[[changes]]
+date = "2026-10-03"
+rule = "upl_absent_unpaid"
+old = "status OPEN"
+new = "status ASSUMED, value unchanged (unknown)"
+source = "Working assumption, Boss, 3 Oct 2026, pending Client"
+
+[[changes]]
+date = "2026-10-03"
+rule = "ot_rate_day_types"
+old = "status OPEN"
+new = "status ASSUMED, value unchanged (empty)"
+source = "Working assumption, Boss, 3 Oct 2026, pending Client"
+
+[[changes]]
+date = "2026-10-03"
+rule = "weekly_upload_day"
+old = "status OPEN"
+new = "status ASSUMED, value unchanged (empty)"
+source = "Working assumption, Boss, 3 Oct 2026, pending Client"
+
+[[changes]]
+date = "2026-10-03"
+rule = "report_recipients"
+old = "status OPEN"
+new = "status ASSUMED, value unchanged (empty)"
+source = "Working assumption, Boss, 3 Oct 2026, pending Client"

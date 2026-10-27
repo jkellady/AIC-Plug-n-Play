@@ -1,0 +1,255 @@
+# Module profile for the IT and security specialist: the Client attendance module.
+# Everything project-specific lives here. To clone the specialist for another
+# module, write a new profile like this one and load it with ModuleProfile.load(path).
+# Paths are relative to `root`, which is itself relative to this file.
+
+[module]
+name = "aic-attendance"
+root = "../../.."
+python = ".venv/Scripts/python.exe"
+venv_dir = ".venv"
+test_args = ["-m", "pytest", "-q", "-p", "no:cacheprovider", "tests"]
+test_timeout = 900
+config_file = "config.toml"
+tests_dir = "tests"
+module_globs = ["src/*.py", "src/agents/*.py", "src/agents/*/*.py"]
+entry_globs = ["*.bat", "*.ps1"]
+doc_dirs = ["docs"]
+data_flow = [
+  "Admin drops clock exports, schedule and HR workbook into 01_DROP_FOLDER/<YYYY-MM>/",
+  "src.daily reads the month folder, checks the manifest, runs capture, rules and the day engine",
+  "Reports are written to 06_REPORTS/<YYYY-MM>/ and 06_REPORTS/LATEST/, runs logged to 07_LOGS/",
+  "Agents under src/agents/ read engine results and write summaries, never the inputs",
+]
+
+[paths]
+required_folders = ["01_DROP_FOLDER", "02_RAW_ARCHIVE", "03_MASTER_DATA", "04_REFERENCE_SOURCES", "05_CAPTURED_DATA", "06_REPORTS", "07_LOGS", "src", "tests"]
+# Never written by the specialist.
+protected = ["01_DROP_FOLDER", "02_RAW_ARCHIVE", "04_REFERENCE_SOURCES", "03_MASTER_DATA", "05_CAPTURED_DATA", "src", "tests", "config.toml", "requirements.txt", ".gitignore", "conftest.py", "CLAUDE.md"]
+# The only places a fix may touch (rename or create, never delete).
+writable = ["06_REPORTS", "07_LOGS"]
+it_dir = "07_LOGS/it"
+backup_dir = "_backup"
+# Staff data never goes into a backup: the fixes only rename lock and manifest files,
+# so the input, captured and report folders, the web app's logins and uploads, and
+# staff workbooks and secrets are all left out.
+backup_exclude = [".venv", ".git", "_backup", "__pycache__",
+  "01_DROP_FOLDER", "02_RAW_ARCHIVE", "04_REFERENCE_SOURCES", "05_CAPTURED_DATA", "06_REPORTS",
+  "07_LOGS/webapp", "07_LOGS/uploads", "07_LOGS/feedback",
+  "03_MASTER_DATA/staff_aliases.csv",
+  "*.xls", "*.xlsx", "*.xlsm", ".env", "users.json", "approvals.csv"]
+engine_files = ["src/daily.py", "src/dayengine.py", "src/capture.py", "src/rules.py"]
+
+[state]
+lock_file = "07_LOGS/daily.lock"
+lock_stale_seconds = 7200
+lock_stale_source = "src/daily.py:LOCK_STALE_SECONDS"
+manifest_file = "07_LOGS/processed_manifest.json"
+manifest_drop_root = "01_DROP_FOLDER"
+process_markers = ["src.daily", "run_daily", "RUN_MONTH", "RUN_NOW"]
+
+[[logs]]
+name = "daily_task"
+path = "07_LOGS/daily_task.log"
+kind = "text"
+tail_lines = 400
+exit_marker = "end python="
+
+[[logs]]
+name = "run_log"
+path = "07_LOGS/run_log.csv"
+kind = "csv"
+status_column = "status"
+fail_values = ["FAILED"]
+
+[[logs]]
+name = "weekly_log"
+path = "07_LOGS/weekly_log.csv"
+kind = "csv"
+status_column = "status"
+fail_values = ["FAILED"]
+
+[[logs]]
+name = "monthly_log"
+path = "07_LOGS/monthly_log.csv"
+kind = "csv"
+status_column = "status"
+fail_values = ["FAILED"]
+
+[security]
+env_file = ".env"
+# Probe paths that .gitignore must ignore.
+gitignore_probes = [
+  "01_DROP_FOLDER/probe.xls", "02_RAW_ARCHIVE/probe.xls", "04_REFERENCE_SOURCES/probe.xlsx",
+  "05_CAPTURED_DATA/probe.csv", "06_REPORTS/probe.xlsx", "07_LOGS/probe.log",
+  "03_MASTER_DATA/staff_aliases.csv", "03_MASTER_DATA/approvals.csv", "approvals.csv", ".env",
+]
+# Tracked or staged paths matching any of these are staff data and must not be in git.
+staff_data_regexes = [
+  '^01_DROP_FOLDER/(?!READ_ME_FIRST\.txt$)', '^02_RAW_ARCHIVE/', '^04_REFERENCE_SOURCES/',
+  '^05_CAPTURED_DATA/', '^06_REPORTS/', '^07_LOGS/', '(^|/)staff_aliases\.csv$',
+  '(^|/)approvals\.csv$', '^_backup/', '(^|/)\.env$',
+]
+backup_regex = '^_backup/'
+secret_source_exts = [".py", ".toml", ".csv", ".log", ".txt", ".md", ".bat", ".ps1", ".json", ".cfg", ".ini", ".html"]
+secret_log_roots = ["07_LOGS"]
+secret_max_bytes = 2000000
+# The email gate: this function argument must default to False.
+email_gate_file = "src/agents/email_sender.py"
+email_gate_function = "send_report"
+email_gate_arg = "send_enabled"
+scheduler_prefixes = ["AIC-Attendance-Agent-", "AIC Daily Check"]
+
+# ---------------------------------------------------------------------------
+# Playbooks. First match wins, so specific signatures come first.
+# `patterns` are regexes matched case-insensitively against the trigger text.
+# Health triggers are the text "health:<check>:<STATUS>".
+# fix_risk: SAFE_AUTOFIX_WITH_APPROVAL (needs a fix_action from the whitelist) or MANUAL_ONLY.
+# ---------------------------------------------------------------------------
+
+[[playbooks]]
+id = "stale_lock"
+class = "stale_lock"
+severity = "MEDIUM"
+patterns = ['health:stale_lock:FAIL', 'Another run appears to be in progress', 'daily\.lock']
+likely_cause = "A previous run stopped before it could release its lock file, so new runs refuse to start."
+proposed_fix = "Rename the lock file to *.stale-<timestamp> after confirming no python process holds it."
+fix_risk = "SAFE_AUTOFIX_WITH_APPROVAL"
+fix_action = "quarantine_stale_lock"
+health_check = "stale_lock"
+rollback = "Rename the quarantined lock back to its original name."
+
+[[playbooks]]
+id = "corrupt_manifest"
+class = "corrupt_manifest"
+severity = "MEDIUM"
+patterns = ['health:manifest:FAIL', 'JSONDecodeError', 'processed_manifest']
+likely_cause = "The processed-files manifest is not valid JSON (interrupted write or manual edit)."
+proposed_fix = "Rename the manifest to *.bad-<timestamp>; the next run rebuilds it and re-processes the month once."
+fix_risk = "SAFE_AUTOFIX_WITH_APPROVAL"
+fix_action = "quarantine_manifest"
+health_check = "manifest"
+rollback = "Rename the *.bad file back to processed_manifest.json."
+
+[[playbooks]]
+id = "missing_output_folder"
+class = "missing_output_folder"
+severity = "LOW"
+patterns = ['health:folders:FAIL', 'No such file or directory.*(07_LOGS|06_REPORTS)', 'FileNotFoundError.*(07_LOGS|06_REPORTS)']
+likely_cause = "An output or log folder was removed or never created."
+proposed_fix = "Recreate the missing writable folder (06_REPORTS or 07_LOGS). Other missing folders need a person."
+fix_risk = "SAFE_AUTOFIX_WITH_APPROVAL"
+fix_action = "recreate_writable_folders"
+health_check = "folders"
+rollback = "Rename the created empty folder aside."
+
+[[playbooks]]
+id = "bad_workbook"
+class = "bad_workbook"
+severity = "HIGH"
+patterns = ['XLRDError', 'xlrd\.biffh', 'BadZipFile', 'InvalidFileException', 'File is not a zip', 'Unsupported format', 'openpyxl.*(corrupt|cannot|unsupported)']
+likely_cause = "An input workbook or clock export is damaged, truncated, or not the expected file type."
+proposed_fix = "Ask Admin to re-export or re-save the file and drop it again. Inputs are never edited by the specialist."
+fix_risk = "MANUAL_ONLY"
+rollback = "Not applicable: no change is made."
+
+[[playbooks]]
+id = "file_open_in_excel"
+class = "file_open_in_excel"
+severity = "MEDIUM"
+patterns = ['PermissionError', 'WinError 32', 'being used by another process']
+likely_cause = "A file is open in Excel or another program, or a permission is missing."
+proposed_fix = "Close the file in Excel and re-run. If it persists, check the folder permissions."
+fix_risk = "MANUAL_ONLY"
+rollback = "Not applicable: no change is made."
+
+[[playbooks]]
+id = "path_too_long"
+class = "path_too_long"
+severity = "MEDIUM"
+patterns = ['WinError 206', 'filename or extension is too long', 'path.*too long']
+likely_cause = "A file path exceeds the Windows length limit."
+proposed_fix = "Move the project nearer the drive root or shorten the folder or file names."
+fix_risk = "MANUAL_ONLY"
+rollback = "Not applicable: no change is made."
+
+[[playbooks]]
+id = "python_env_missing"
+class = "python_env_missing"
+severity = "HIGH"
+patterns = ['health:python_env:FAIL', 'ModuleNotFoundError', 'No module named', 'is not recognized as an internal or external command', 'python.*not found']
+likely_cause = "The Python virtual environment is missing or incomplete (for example after a copy of the folder)."
+proposed_fix = "Run CHECK_INSTALL.bat, then rebuild the venv from requirements.txt. Needs a person."
+fix_risk = "MANUAL_ONLY"
+rollback = "Not applicable: no change is made."
+
+[[playbooks]]
+id = "missing_input_month"
+class = "missing_input_month"
+severity = "MEDIUM"
+patterns = ['No such file or directory.*01_DROP_FOLDER', 'FileNotFoundError.*01_DROP_FOLDER', 'month folder.*(missing|not found|empty)', 'NotADirectoryError']
+likely_cause = "The month folder under 01_DROP_FOLDER does not exist or has no files yet."
+proposed_fix = "Create the month folder with CREATE_FOLDERS.bat or /new-month, then ask Admin to drop the files. The specialist never touches 01_DROP_FOLDER."
+fix_risk = "MANUAL_ONLY"
+rollback = "Not applicable: no change is made."
+
+[[playbooks]]
+id = "test_regression"
+class = "test_regression"
+severity = "HIGH"
+patterns = ['health:tests:FAIL', 'FAILED tests[/\\]', '\d+ failed', 'AssertionError']
+likely_cause = "A test fails after a code or data change."
+proposed_fix = "Compare against the last green commit or the dated backup, find the edit, and fix or revert it. Source edits are for the builder."
+fix_risk = "MANUAL_ONLY"
+rollback = "Not applicable: no change is made."
+
+[[playbooks]]
+id = "secret_exposed"
+class = "secret_exposed"
+severity = "CRITICAL"
+patterns = ['health:secrets_scan:(FAIL|WARN)', 'health:env_tracking:FAIL']
+likely_cause = "A credential-looking string is in a log, report or source file, or the env file is tracked or inside an output folder."
+proposed_fix = "Rotate the credential, remove the string from the file, and make sure the env file stays untracked and outside output folders."
+fix_risk = "MANUAL_ONLY"
+rollback = "Not applicable: no change is made."
+
+[[playbooks]]
+id = "staff_data_in_git"
+class = "staff_data_in_git"
+severity = "CRITICAL"
+patterns = ['health:git_staff_data:FAIL', 'health:backup_untracked:FAIL', 'health:gitignore_coverage:FAIL']
+likely_cause = "Staff data or a backup copy is tracked or staged in git, or .gitignore lost a protective rule."
+proposed_fix = "Unstage with git rm --cached and restore the .gitignore rules. Needs the builder."
+fix_risk = "MANUAL_ONLY"
+rollback = "Not applicable: no change is made."
+
+[[playbooks]]
+id = "email_gate_open"
+class = "email_gate_open"
+severity = "CRITICAL"
+patterns = ['health:email_gate:FAIL']
+likely_cause = "Email sending is enabled by default or a caller forces it on."
+proposed_fix = "Set send_enabled back to False. Needs the builder."
+fix_risk = "MANUAL_ONLY"
+rollback = "Not applicable: no change is made."
+
+[[playbooks]]
+id = "scheduler_failure"
+class = "scheduler_failure"
+severity = "MEDIUM"
+patterns = ['^scheduler_exit', 'health:logs:FAIL']
+likely_cause = "The scheduled run exited with an error; the log tail holds the cause."
+proposed_fix = "Read the exception class and file/line in the evidence, then follow the matching playbook."
+fix_risk = "MANUAL_ONLY"
+rollback = "Not applicable: no change is made."
+
+# Monthly check: where a month's inputs, reports and logs live (used by monthly.py).
+[monthly]
+drop_root = "01_DROP_FOLDER"
+reports_root = "06_REPORTS"
+clock_glob = "*-All_Report*.xls"
+week_start = 0                      # 0 = Monday
+weekly_name = "Weekly_{iso_year}-W{iso_week:02d}.xlsx"
+monthly_names = ["Monthly_{year}-{month:02d}.xlsx", "TRIAL_Attendance_flags_{year}-{month:02d}.xlsx"]
+log_files = ["07_LOGS/weekly_log.csv", "07_LOGS/monthly_log.csv", "07_LOGS/run_log.csv", "07_LOGS/daily_task.log", "07_LOGS/email_log.csv", "07_LOGS/reply_log.csv"]
+incident_log = "07_LOGS/it/incident_log.csv"

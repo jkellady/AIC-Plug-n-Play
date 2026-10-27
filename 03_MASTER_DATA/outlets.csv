@@ -1,0 +1,7 @@
+﻿outlet_id,code_on_clock_file,name_on_record_tab,label_on_schedule,other_names_used,website_listing_crosscheck,status,client_confirm
+OUT1,OUT1,Example Outlet 1,OUT1,,,Template,
+OUT2,OUT2,Example Outlet 2,OUT2,,,Template,
+OUT3,OUT3,Example Outlet 3,OUT3,,,Template,
+OUT4,OUT4,Example Outlet 4,OUT4,,,Template,
+OUT5,,,OUT5,,,Template,
+HQ,,Head Office,,OFFICE,Not a shop,Template,

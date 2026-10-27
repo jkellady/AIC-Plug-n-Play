@@ -1,0 +1,15 @@
+﻿code,count_may_2026,day_type,start,end,hours_in_roster,note
+10-6.30PM,,WORK,10:00,18:30,8.5,example: read from code
+10-8PM,,WORK,10:00,20:00,10.0,example: read from code
+12-10PM,,WORK,12:00,22:00,10.0,example: read from code
+AM,,WORK,10:00,18:00,8.0,ASSUMED
+PM,,WORK,14:00,22:00,8.0,ASSUMED
+FULL,,WORK,10:00,22:00,12.0,ASSUMED
+OFF,,OFF,,,,
+OFF*,,OFF,,,,asterisk meaning to confirm
+PH,,PUBLIC HOLIDAY,,,8.5,event/holiday day
+AL,,LEAVE (annual),,,8.5,
+MC,,LEAVE (medical),,,8.0,
+UPL,,LEAVE,,,8.0,"Q11: whether UPL is unpaid is open, see rules.toml upl_absent_unpaid"
+ABSENT,,ABSENT,,,8.0,Q11
+PM / OUT2,,WORK,14:00,22:00,8.0,worked at OUT2 that day (transfer marker); ASSUMED

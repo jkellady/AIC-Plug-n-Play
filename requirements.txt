@@ -1,0 +1,7 @@
+# Versions tested with the May 2026 sample. Python 3.12.
+pandas==3.0.2
+openpyxl==3.1.5
+xlrd==2.0.2
+
+# dev/test
+pytest==9.1.1
